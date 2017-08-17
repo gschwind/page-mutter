@@ -207,7 +207,7 @@ struct _MetaWindow
   guint minimize_after_placement : 1;
 
   /* The current tile mode */
-  guint tile_mode : 2;
+  guint tile_mode : 3;
   /* The last "full" maximized/unmaximized state. We need to keep track of
    * that to toggle between normal/tiled or maximized/tiled states. */
   guint saved_maximize : 1;
@@ -565,15 +565,18 @@ struct _MetaWindowClass
 #define META_WINDOW_MAXIMIZED_HORIZONTALLY(w)  ((w)->maximized_horizontally)
 #define META_WINDOW_TILED_SIDE_BY_SIDE(w)      ((w)->maximized_vertically && \
                                                 !(w)->maximized_horizontally && \
-                                                 (w)->tile_mode != META_TILE_NONE)
+                                                ((w)->tile_mode == META_TILE_LEFT || \
+                                                 (w)->tile_mode == META_TILE_RIGHT))
+#define META_WINDOW_TILED(w)          ((w)->tile_mode == META_TILE_TILED)
+
 #define META_WINDOW_TILED_LEFT(w)     (META_WINDOW_TILED_SIDE_BY_SIDE(w) && \
                                        (w)->tile_mode == META_TILE_LEFT)
 #define META_WINDOW_TILED_RIGHT(w)    (META_WINDOW_TILED_SIDE_BY_SIDE(w) && \
                                        (w)->tile_mode == META_TILE_RIGHT)
 #define META_WINDOW_TILED_MAXIMIZED(w)(META_WINDOW_MAXIMIZED(w) && \
                                        (w)->tile_mode == META_TILE_MAXIMIZED)
-#define META_WINDOW_ALLOWS_MOVE(w)     ((w)->has_move_func && !(w)->fullscreen)
-#define META_WINDOW_ALLOWS_RESIZE_EXCEPT_HINTS(w)   ((w)->has_resize_func && !META_WINDOW_MAXIMIZED (w) && !(w)->fullscreen && !(w)->shaded)
+#define META_WINDOW_ALLOWS_MOVE(w)     ((w)->has_move_func && !(w)->fullscreen && !META_WINDOW_TILED(w))
+#define META_WINDOW_ALLOWS_RESIZE_EXCEPT_HINTS(w)   ((w)->has_resize_func && !META_WINDOW_MAXIMIZED (w) && !(w)->fullscreen && !(w)->shaded && !META_WINDOW_TILED(w))
 #define META_WINDOW_ALLOWS_RESIZE(w)   (META_WINDOW_ALLOWS_RESIZE_EXCEPT_HINTS (w) &&                \
                                         (((w)->size_hints.min_width < (w)->size_hints.max_width) ||  \
                                          ((w)->size_hints.min_height < (w)->size_hints.max_height)))
