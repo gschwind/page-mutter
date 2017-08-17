@@ -2719,7 +2719,8 @@ ensure_size_hints_satisfied (MetaRectangle    *rect,
 static void
 meta_window_save_rect (MetaWindow *window)
 {
-  if (!(META_WINDOW_MAXIMIZED (window) || META_WINDOW_TILED_SIDE_BY_SIDE (window) || window->fullscreen))
+  if (!(META_WINDOW_MAXIMIZED (window) || META_WINDOW_TILED_SIDE_BY_SIDE (window) ||
+		  window->fullscreen || META_WINDOW_TILED(window)))
     {
       /* save size/pos as appropriate args for move_resize */
       if (!window->maximized_horizontally)
@@ -2880,6 +2881,12 @@ gboolean
 meta_window_is_fullscreen (MetaWindow *window)
 {
   return window->fullscreen;
+}
+
+gboolean
+meta_window_is_tiled_with_custom_position (MetaWindow *window)
+{
+  return META_WINDOW_TILED(window);
 }
 
 /**
@@ -3066,6 +3073,12 @@ update_edge_constraints (MetaWindow *window)
       else
         window->edge_constraints[3] = META_EDGE_CONSTRAINT_NONE;
       break;
+    case META_TILE_TILED:
+        window->edge_constraints[0] = META_EDGE_CONSTRAINT_NONE;
+        window->edge_constraints[1] = META_EDGE_CONSTRAINT_NONE;
+        window->edge_constraints[2] = META_EDGE_CONSTRAINT_NONE;
+        window->edge_constraints[3] = META_EDGE_CONSTRAINT_NONE;
+        break;
     }
 
   /* h/vmaximize also modify the edge constraints */
@@ -3479,6 +3492,160 @@ meta_window_unmake_fullscreen (MetaWindow  *window)
 
       g_object_notify_by_pspec (G_OBJECT (window), obj_props[PROP_FULLSCREEN]);
     }
+}
+
+void
+meta_window_make_tiled (MetaWindow  *window)
+{
+  MetaRectangle old_frame_rect, old_buffer_rect;
+
+  g_return_if_fail (!window->override_redirect);
+  /* Only do something if the window isn't already tiled
+   */
+  g_return_if_fail (!META_WINDOW_TILED(window));
+
+  if (window->shaded)
+    {
+      /* Shading sucks anyway; I'm not adding a timestamp argument
+       * to this function just for this niche usage & corner case.
+       */
+      guint32 timestamp =
+        meta_display_get_current_time_roundtrip (window->display);
+      meta_window_unshade (window, timestamp);
+    }
+
+  /* if the window hasn't been placed yet, we'll maximize it then
+   */
+  if (!window->placed)
+    {
+      return;
+    }
+
+  meta_window_get_frame_rect (window, &old_frame_rect);
+  meta_window_get_buffer_rect (window, &old_buffer_rect);
+
+  meta_compositor_size_change_window (window->display->compositor,
+                                      window, META_SIZE_CHANGE_TILE,
+                                      &old_frame_rect, &old_buffer_rect);
+
+
+  window->tile_mode = META_TILE_TILED;
+
+  meta_topic (META_DEBUG_WINDOW_OPS, "Tile %s\n", window->desc);
+
+  /* save floating position */
+  meta_window_save_rect (window);
+
+  /* Update the edge constraints */
+  update_edge_constraints (window);
+
+  meta_window_recalc_features (window);
+  set_net_wm_state (window);
+
+  meta_window_move_resize_internal (window,
+                                    (META_MOVE_RESIZE_MOVE_ACTION |
+                                     META_MOVE_RESIZE_RESIZE_ACTION |
+                                     META_MOVE_RESIZE_STATE_CHANGED),
+                                    NorthWestGravity,
+                                    window->unconstrained_rect);
+
+}
+
+void
+meta_window_unmake_tiled (MetaWindow        *window)
+{
+  g_return_if_fail (!window->override_redirect);
+
+  /* Do something only if the window is tiled */
+  g_return_if_fail (META_WINDOW_TILED(window));
+
+  MetaRectangle *desired_rect;
+  MetaRectangle target_rect;
+  MetaRectangle work_area;
+  MetaRectangle old_frame_rect, old_buffer_rect;
+
+  meta_window_get_work_area_for_monitor (window, window->monitor->number, &work_area);
+  meta_window_get_frame_rect (window, &old_frame_rect);
+  meta_window_get_buffer_rect (window, &old_buffer_rect);
+
+  meta_topic (META_DEBUG_WINDOW_OPS,
+              "Untile %s\n",
+              window->desc);
+
+  window->tile_mode = META_TILE_NONE;
+
+  /* recalc_features() will eventually clear the cached frame
+   * extents, but we need the correct frame extents in the code below,
+   * so invalidate the old frame extents manually up front.
+   */
+  meta_window_frame_size_changed (window);
+
+  desired_rect = &window->saved_rect;
+
+  /* Unmaximize to the saved_rect position in the direction(s)
+   * being unmaximized.
+   */
+  target_rect = old_frame_rect;
+
+  /* Avoid unmaximizing to "almost maximized" size when the previous size
+   * is greater then 80% of the work area use MAX_UNMAXIMIZED_WINDOW_AREA of the work area as upper limit
+   * while maintaining the aspect ratio.
+   */
+  if (desired_rect->width * desired_rect->height > work_area.width * work_area.height * MAX_UNMAXIMIZED_WINDOW_AREA)
+    {
+      if (desired_rect->width > desired_rect->height)
+        {
+          float aspect = (float)desired_rect->height / (float)desired_rect->width;
+          desired_rect->width = MAX (work_area.width * sqrt (MAX_UNMAXIMIZED_WINDOW_AREA), window->size_hints.min_width);
+          desired_rect->height = MAX (desired_rect->width * aspect, window->size_hints.min_height);
+        }
+      else
+        {
+          float aspect = (float)desired_rect->width / (float)desired_rect->height;
+          desired_rect->height = MAX (work_area.height * sqrt (MAX_UNMAXIMIZED_WINDOW_AREA), window->size_hints.min_height);
+          desired_rect->width = MAX (desired_rect->height * aspect, window->size_hints.min_width);
+        }
+    }
+
+  target_rect.x     = desired_rect->x;
+  target_rect.width = desired_rect->width;
+  target_rect.y      = desired_rect->y;
+  target_rect.height = desired_rect->height;
+
+  /* Window's size hints may have changed while maximized, making
+   * saved_rect invalid.  #329152
+   */
+  meta_window_frame_rect_to_client_rect (window, &target_rect, &target_rect);
+  ensure_size_hints_satisfied (&target_rect, &window->size_hints);
+  meta_window_client_rect_to_frame_rect (window, &target_rect, &target_rect);
+
+  meta_compositor_size_change_window (window->display->compositor, window,
+                                      META_SIZE_CHANGE_UNTILE,
+                                      &old_frame_rect, &old_buffer_rect);
+
+  meta_window_move_resize_internal (window,
+                                    (META_MOVE_RESIZE_MOVE_ACTION |
+                                     META_MOVE_RESIZE_RESIZE_ACTION |
+                                     META_MOVE_RESIZE_STATE_CHANGED),
+                                    NorthWestGravity,
+                                    target_rect);
+
+  /* When we unmaximize, if we're doing a mouse move also we could
+   * get the window suddenly jumping to the upper left corner of
+   * the workspace, since that's where it was when the grab op
+   * started. So we need to update the grab anchor position.
+   */
+  if (meta_grab_op_is_moving (window->display->grab_op) &&
+      window->display->grab_window == window)
+    {
+      window->display->grab_anchor_window_pos = target_rect;
+    }
+
+  meta_window_recalc_features (window);
+  set_net_wm_state (window);
+  if (!window->monitor->in_fullscreen)
+    meta_screen_queue_check_fullscreen (window->screen);
+
 }
 
 static void
@@ -6563,6 +6730,7 @@ meta_window_get_tile_area (MetaWindow    *window,
 
   if (tile_mode == META_TILE_RIGHT)
     tile_area->x += work_area.width - tile_area->width;
+
 }
 
 gboolean
