@@ -180,6 +180,7 @@ void     meta_window_foreach_ancestor         (MetaWindow            *window,
 
 MetaMaximizeFlags meta_window_get_maximized (MetaWindow *window);
 gboolean          meta_window_is_fullscreen (MetaWindow *window);
+gboolean          meta_window_is_tiled (MetaWindow *window);
 gboolean          meta_window_is_screen_sized (MetaWindow *window);
 gboolean          meta_window_is_monitor_sized (MetaWindow *window);
 gboolean          meta_window_is_on_primary_monitor (MetaWindow *window);
@@ -218,6 +219,8 @@ MetaWindow *meta_window_get_tile_match (MetaWindow *window);
 
 void        meta_window_make_fullscreen    (MetaWindow  *window);
 void        meta_window_unmake_fullscreen  (MetaWindow  *window);
+void        meta_window_make_tiled         (MetaWindow  *window);
+void        meta_window_unmake_tiled       (MetaWindow  *window);
 void        meta_window_make_above         (MetaWindow  *window);
 void        meta_window_unmake_above       (MetaWindow  *window);
 void        meta_window_shade              (MetaWindow  *window,
