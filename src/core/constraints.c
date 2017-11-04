@@ -1204,6 +1204,12 @@ constrain_size_limits (MetaWindow         *window,
     max_size.width = MAX (max_size.width, info->current.width);
   if (window->maximized_vertically)
     max_size.height = MAX (max_size.height, info->current.height);
+  /* tiled window can be smaller than the requested minimu */
+  if (META_WINDOW_TILED_WITH_CUSTOM_POSITION(window))
+    {
+	  min_size.width = 1;
+	  min_size.height = 1;
+    }
   too_small = !meta_rectangle_could_fit_rect (&info->current, &min_size);
   too_big   = !meta_rectangle_could_fit_rect (&max_size, &info->current);
   constraint_already_satisfied = !too_big && !too_small;
