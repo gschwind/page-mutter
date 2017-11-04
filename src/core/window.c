@@ -2719,7 +2719,8 @@ ensure_size_hints_satisfied (MetaRectangle    *rect,
 static void
 meta_window_save_rect (MetaWindow *window)
 {
-  if (!(META_WINDOW_MAXIMIZED (window) || META_WINDOW_TILED_SIDE_BY_SIDE (window) || window->fullscreen))
+  if (!(META_WINDOW_MAXIMIZED (window) || META_WINDOW_TILED_SIDE_BY_SIDE (window) ||
+		  window->fullscreen || META_WINDOW_TILED_WITH_CUSTOM_POSITION(window)))
     {
       /* save size/pos as appropriate args for move_resize */
       if (!window->maximized_horizontally)
@@ -2779,28 +2780,6 @@ meta_window_maximize_internal (MetaWindow        *window,
   g_object_notify_by_pspec (G_OBJECT (window), obj_props[PROP_MAXIMIZED_HORIZONTALLY]);
   g_object_notify_by_pspec (G_OBJECT (window), obj_props[PROP_MAXIMIZED_VERTICALLY]);
   g_object_thaw_notify (G_OBJECT (window));
-}
-
-void
-meta_window_make_tiled_with_custom_position_internal (MetaWindow        *window,
-                                                      MetaRectangle     *saved_rect)
-{
-
-  meta_topic (META_DEBUG_WINDOW_OPS,
-              "Tile %s\n",
-              window->desc);
-
-  if (saved_rect != NULL)
-    window->saved_rect = *saved_rect;
-  else
-    meta_window_save_rect (window);
-
-  /* Update the edge constraints */
-  update_edge_constraints (window);
-
-  meta_window_recalc_features (window);
-  set_net_wm_state (window);
-
 }
 
 void
@@ -3516,10 +3495,8 @@ meta_window_unmake_fullscreen (MetaWindow  *window)
 }
 
 void
-meta_window_make_tiled_with_custom_position (MetaWindow  *window, MetaRectangle *rect)
+meta_window_make_tiled_with_custom_position (MetaWindow  *window)
 {
-	  MetaRectangle *saved_rect = NULL;
-
 	  g_return_if_fail (!window->override_redirect);
 
 	  /* Only do something if the window isn't already maximized in the
@@ -3544,28 +3521,19 @@ meta_window_make_tiled_with_custom_position (MetaWindow  *window, MetaRectangle 
 			  return;
 			}
 
-	      if (window->tile_mode != META_TILE_NONE)
-	        {
-	          saved_rect = &window->saved_rect;
-	        }
-
-	      window->unconstrained_rect = *rect;
 	      window->tile_mode = META_TILE_WITH_CUSTOM_POSITION;
 
-	      meta_window_make_tiled_with_custom_position_internal (window,
-	                                     saved_rect);
+	      meta_topic (META_DEBUG_WINDOW_OPS, "Tile %s\n", window->desc);
 
-	      MetaRectangle old_frame_rect, old_buffer_rect;
+	      /* save floating position */
+	      meta_window_save_rect (window);
 
-	      meta_window_get_frame_rect (window, &old_frame_rect);
-	      meta_window_get_buffer_rect (window, &old_buffer_rect);
+	      /* Update the edge constraints */
+	      update_edge_constraints (window);
 
-	      meta_window_move_resize_internal (window,
-	                                        (META_MOVE_RESIZE_MOVE_ACTION |
-	                                         META_MOVE_RESIZE_RESIZE_ACTION |
-	                                         META_MOVE_RESIZE_STATE_CHANGED),
-	                                        NorthWestGravity,
-	                                        window->unconstrained_rect);
+	      meta_window_recalc_features (window);
+	      set_net_wm_state (window);
+
 	    }
 }
 

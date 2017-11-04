@@ -605,8 +605,6 @@ void        meta_window_restore_tile       (MetaWindow        *window,
 void        meta_window_maximize_internal  (MetaWindow        *window,
                                             MetaMaximizeFlags  directions,
                                             MetaRectangle     *saved_rect);
-void        meta_window_make_tiled_with_custom_position_internal (MetaWindow        *window,
-                                                                  MetaRectangle     *saved_rect);
 
 void        meta_window_make_fullscreen_internal (MetaWindow    *window);
 void        meta_window_update_fullscreen_monitors (MetaWindow         *window,
