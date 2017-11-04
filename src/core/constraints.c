@@ -180,6 +180,10 @@ static gboolean constrain_aspect_ratio       (MetaWindow         *window,
                                               ConstraintInfo     *info,
                                               ConstraintPriority  priority,
                                               gboolean            check_only);
+static gboolean constrain_aspect_ratio_tiled (MetaWindow         *window,
+                                              ConstraintInfo     *info,
+                                              ConstraintPriority  priority,
+                                              gboolean            check_only);
 static gboolean constrain_to_single_monitor  (MetaWindow         *window,
                                               ConstraintInfo     *info,
                                               ConstraintPriority  priority,
@@ -227,6 +231,7 @@ static const Constraint all_constraints[] = {
   {constrain_size_increments,    "constrain_size_increments"},
   {constrain_size_limits,        "constrain_size_limits"},
   {constrain_aspect_ratio,       "constrain_aspect_ratio"},
+  {constrain_aspect_ratio_tiled, "constrain_aspect_ratio_tiled"},
   {constrain_to_single_monitor,  "constrain_to_single_monitor"},
   {constrain_fully_onscreen,     "constrain_fully_onscreen"},
   {constrain_titlebar_visible,   "constrain_titlebar_visible"},
@@ -937,7 +942,7 @@ constrain_maximization (MetaWindow         *window,
 
   /* Determine whether constraint applies; exit if it doesn't */
   if ((!window->maximized_horizontally && !window->maximized_vertically) ||
-      META_WINDOW_TILED_SIDE_BY_SIDE (window) || META_WINDOW_TILED (window))
+      META_WINDOW_TILED_SIDE_BY_SIDE (window))
     return TRUE;
 
   /* Calculate target_size = maximized size of (window + frame) */
@@ -1204,11 +1209,11 @@ constrain_size_limits (MetaWindow         *window,
     max_size.width = MAX (max_size.width, info->current.width);
   if (window->maximized_vertically)
     max_size.height = MAX (max_size.height, info->current.height);
-  /* tiled window can be smaller than the requested minimu */
-  if (META_WINDOW_TILED(window))
+  /* tiled window can be smaller than the requested minimun */
+  if (META_WINDOW_TILED (window))
     {
-	  min_size.width = 1;
-	  min_size.height = 1;
+       min_size.width = 1;
+       min_size.height = 1;
     }
   too_small = !meta_rectangle_could_fit_rect (&info->current, &min_size);
   too_big   = !meta_rectangle_could_fit_rect (&max_size, &info->current);
@@ -1251,6 +1256,10 @@ constrain_aspect_ratio (MetaWindow         *window,
   MetaRectangle client_rect;
 
   if (priority > PRIORITY_ASPECT_RATIO)
+    return TRUE;
+
+  /* aspect ratio for tiled window are handle by constrain_aspect_ratio_for_tiled */
+  if (META_WINDOW_TILED (window))
     return TRUE;
 
   /* Determine whether constraint applies; exit if it doesn't. */
@@ -1313,68 +1322,50 @@ constrain_aspect_ratio (MetaWindow         *window,
   new_width = client_rect.width;
   new_height = client_rect.height;
 
-	if (!META_WINDOW_TILED(window))
-	  {
-	  switch (info->resize_gravity)
-		{
-		case WestGravity:
-		case EastGravity:
-		  /* Yeah, I suck for doing implicit rounding -- sue me */
-		  new_height = CLAMP (new_height, new_width / maxr,  new_width / minr);
-		  break;
+  switch (info->resize_gravity)
+    {
+    case WestGravity:
+    case EastGravity:
+      /* Yeah, I suck for doing implicit rounding -- sue me */
+      new_height = CLAMP (new_height, new_width / maxr,  new_width / minr);
+      break;
 
-		case NorthGravity:
-		case SouthGravity:
-		  /* Yeah, I suck for doing implicit rounding -- sue me */
-		  new_width  = CLAMP (new_width,  new_height * minr, new_height * maxr);
-		  break;
+    case NorthGravity:
+    case SouthGravity:
+      /* Yeah, I suck for doing implicit rounding -- sue me */
+      new_width  = CLAMP (new_width,  new_height * minr, new_height * maxr);
+      break;
 
-		case NorthWestGravity:
-		case SouthWestGravity:
-		case CenterGravity:
-		case NorthEastGravity:
-		case SouthEastGravity:
-		case StaticGravity:
-		default:
-			  /* Find what width would correspond to new_height, and what height would
-			   * correspond to new_width */
-			  alt_width  = CLAMP (new_width,  new_height * minr, new_height * maxr);
-			  alt_height = CLAMP (new_height, new_width / maxr,  new_width / minr);
+    case NorthWestGravity:
+    case SouthWestGravity:
+    case CenterGravity:
+    case NorthEastGravity:
+    case SouthEastGravity:
+    case StaticGravity:
+    default:
+      /* Find what width would correspond to new_height, and what height would
+       * correspond to new_width */
+      alt_width  = CLAMP (new_width,  new_height * minr, new_height * maxr);
+      alt_height = CLAMP (new_height, new_width / maxr,  new_width / minr);
 
-			  /* The line connecting the points (alt_width, new_height) and
-			   * (new_width, alt_height) provide a range of
-			   * valid-for-the-aspect-ratio-constraint sizes.  We want the
-			   * size in that range closest to the value requested, i.e. the
-			   * point on the line which is closest to the point (new_width,
-			   * new_height)
-			   */
-			  meta_rectangle_find_linepoint_closest_to_point (alt_width, new_height,
-															  new_width, alt_height,
-															  new_width, new_height,
-															  &best_width, &best_height);
+      /* The line connecting the points (alt_width, new_height) and
+       * (new_width, alt_height) provide a range of
+       * valid-for-the-aspect-ratio-constraint sizes.  We want the
+       * size in that range closest to the value requested, i.e. the
+       * point on the line which is closest to the point (new_width,
+       * new_height)
+       */
+      meta_rectangle_find_linepoint_closest_to_point (alt_width, new_height,
+                                                      new_width, alt_height,
+                                                      new_width, new_height,
+                                                      &best_width, &best_height);
 
-			  /* Yeah, I suck for doing implicit rounding -- sue me */
-			  new_width  = best_width;
-			  new_height = best_height;
+      /* Yeah, I suck for doing implicit rounding -- sue me */
+      new_width  = best_width;
+      new_height = best_height;
 
-		  break;
-		}
-
-	  }
-	else
-	  {
-		  /* ensure ratio constrain and new size inside client_rect */
-		  alt_width  = new_height * maxr;
-		  alt_height = new_width / minr;
-		  if (alt_height < new_height)
-			{
-			  new_height = alt_height;
-			}
-		  else if (alt_width < new_width)
-			{
-			  new_width = alt_width;
-			}
-	  }
+      break;
+    }
 
   {
     client_rect.width = new_width;
@@ -1392,23 +1383,115 @@ constrain_aspect_ratio (MetaWindow         *window,
   else
     start_rect = &info->orig;
 
-  if (!META_WINDOW_TILED(window))
-    {
-	  meta_rectangle_resize_with_gravity (start_rect,
-										  &info->current,
-										  info->resize_gravity,
-										  new_width,
-										  new_height);
-    }
-  else
-    {
+  meta_rectangle_resize_with_gravity (start_rect,
+                                      &info->current,
+                                      info->resize_gravity,
+                                      new_width,
+                                      new_height);
 
-	  info->current.x += (info->current.width - new_width) / 2;
-	  info->current.y += (info->current.height - new_height) / 2;
-	  info->current.width = new_width;
-	  info->current.height = new_height;
+  return TRUE;
+}
 
+static gboolean
+constrain_aspect_ratio_tiled (MetaWindow         *window,
+                                  ConstraintInfo     *info,
+                                  ConstraintPriority  priority,
+                                  gboolean            check_only)
+{
+  double minr, maxr;
+  gboolean constraints_are_inconsistent, constraint_already_satisfied;
+  int fudge, new_width, new_height;
+  double alt_width, alt_height;
+  MetaRectangle client_rect;
+
+  if (priority > PRIORITY_ASPECT_RATIO)
+    return TRUE;
+
+  if (!META_WINDOW_TILED (window))
+    return TRUE;
+
+  /* Determine whether constraint applies; exit if it doesn't. */
+  minr =         window->size_hints.min_aspect.x /
+         (double)window->size_hints.min_aspect.y;
+  maxr =         window->size_hints.max_aspect.x /
+         (double)window->size_hints.max_aspect.y;
+  constraints_are_inconsistent = minr > maxr;
+  if (constraints_are_inconsistent ||
+      info->action_type == ACTION_MOVE)
+    return TRUE;
+
+  /* Determine whether constraint is already satisfied; exit if it is.  We
+   * need the following to hold:
+   *
+   *                 width
+   *         minr <= ------ <= maxr
+   *                 height
+   *
+   * But we need to allow for some slight fudging since width and height
+   * are integers instead of floating point numbers (this is particularly
+   * important when minr == maxr), so we allow width and height to be off
+   * a little bit from strictly satisfying these equations.  For just one
+   * sided resizing, we have to make the fudge factor a little bigger
+   * because of how meta_rectangle_resize_with_gravity treats those as
+   * being a resize increment (FIXME: I should handle real resize
+   * increments better here...)
+   */
+  switch (info->resize_gravity)
+    {
+    case WestGravity:
+    case NorthGravity:
+    case SouthGravity:
+    case EastGravity:
+      fudge = 2;
+      break;
+
+    case NorthWestGravity:
+    case SouthWestGravity:
+    case CenterGravity:
+    case NorthEastGravity:
+    case SouthEastGravity:
+    case StaticGravity:
+    default:
+      fudge = 1;
+      break;
     }
+
+  meta_window_frame_rect_to_client_rect (window, &info->current, &client_rect);
+
+  constraint_already_satisfied =
+    client_rect.width - (client_rect.height * minr ) > -minr*fudge &&
+    client_rect.width - (client_rect.height * maxr ) <  maxr*fudge;
+  if (check_only || constraint_already_satisfied)
+    return constraint_already_satisfied;
+
+  /*** Enforce constraint ***/
+  new_width = client_rect.width;
+  new_height = client_rect.height;
+
+  /* ensure ratio constrain and new size inside client_rect */
+  alt_width  = new_height * maxr;
+  alt_height = new_width / minr;
+  if (alt_height < new_height)
+    {
+      new_height = alt_height;
+    }
+  else if (alt_width < new_width)
+    {
+      new_width = alt_width;
+    }
+
+  {
+    client_rect.width = new_width;
+    client_rect.height = new_height;
+    meta_window_client_rect_to_frame_rect (window, &client_rect, &client_rect);
+    new_width = client_rect.width;
+    new_height = client_rect.height;
+  }
+
+  info->current.x += (info->current.width - new_width) / 2;
+  info->current.y += (info->current.height - new_height) / 2;
+  info->current.width = new_width;
+  info->current.height = new_height;
 
   return TRUE;
 }
