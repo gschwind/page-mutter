@@ -1402,11 +1402,12 @@ constrain_aspect_ratio (MetaWindow         *window,
     }
   else
     {
-	  meta_rectangle_resize_with_gravity (start_rect,
-	                                      &info->current,
-										  CenterGravity,
-	                                      new_width,
-	                                      new_height);
+
+	  info->current.x += (info->current.width - new_width) / 2;
+	  info->current.y += (info->current.height - new_height) / 2;
+	  info->current.width = new_width;
+	  info->current.height = new_height;
+
     }
 
   return TRUE;
