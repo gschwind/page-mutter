@@ -187,6 +187,17 @@ meta_workspace_class_init (MetaWorkspaceClass *klass)
   object_class->get_property = meta_workspace_get_property;
   object_class->set_property = meta_workspace_set_property;
 
+  /**
+   * MetaWorkspace::window-added:
+   * @metaworkspace: a #MetaWindow
+   * @arg1: #MetaWindow
+   *
+   * This is emitted when a window is added to the
+   * workspace. This happen also when the window's
+   * on-all-workspace property change to true. In that
+   * case the window is added to all workspaces after
+   * being removed from the current workspace.
+   */
   signals[WINDOW_ADDED] = g_signal_new ("window-added",
                                         G_TYPE_FROM_CLASS (klass),
                                         G_SIGNAL_RUN_LAST,
