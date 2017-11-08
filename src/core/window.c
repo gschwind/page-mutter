@@ -590,6 +590,13 @@ meta_window_class_init (MetaWindowClass *klass)
 
   g_object_class_install_properties (object_class, LAST_PROP, obj_props);
 
+  /**
+   * MetaWindow::workspace-changed:
+   * @window: a #MetaWindow
+   *
+   * This is emitted when the workspace of window or the
+   * on-all-workspace property are changed.
+   */
   window_signals[WORKSPACE_CHANGED] =
     g_signal_new ("workspace-changed",
                   G_TYPE_FROM_CLASS (object_class),
