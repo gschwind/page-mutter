@@ -206,6 +206,18 @@ meta_workspace_class_init (MetaWorkspaceClass *klass)
                                         NULL, NULL, NULL,
                                         G_TYPE_NONE, 1,
                                         META_TYPE_WINDOW);
+
+  /**
+   * MetaWorkspace::window-removed:
+   * @metaworkspace: a #MetaWindow
+   * @arg1: #MetaWindow
+   *
+   * This is emitted when a window is removed to the
+   * workspace. This happen also when the window's
+   * on-all-workspace property change to false. In that
+   * case the window is removed from all workspaces before
+   * being re-added to the current workspace.
+   */
   signals[WINDOW_REMOVED] = g_signal_new ("window-removed",
                                           G_TYPE_FROM_CLASS (klass),
                                           G_SIGNAL_RUN_LAST,
