@@ -131,7 +131,7 @@ AM_CPPFLAGS += \
 test_conformance_CFLAGS = -g3 -O0 $(COGL_DEP_CFLAGS) $(COGL_EXTRA_CFLAGS) -Wno-error=maybe-uninitialized -Wno-error=nested-externs -Wno-error=missing-prototypes
 test_conformance_LDADD = \
 	$(COGL_DEP_LIBS) \
-	$(top_builddir)/cogl/libmutter-cogl-$(LIBMUTTER_API_VERSION).la \
+	$(top_builddir)/cogl/libpage-mutter-cogl-$(LIBMUTTER_API_VERSION).la \
 	$(LIBM)
 if BUILD_COGL_PATH
 test_conformance_LDADD += $(top_builddir)/cogl-path/libmutter-cogl-path-$(LIBMUTTER_API_VERSION).la

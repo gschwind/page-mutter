@@ -70,7 +70,7 @@ mutterlib_LTLIBRARIES = libmutter-cogl-path-@LIBMUTTER_API_VERSION@.la
 libmutter_cogl_path_@LIBMUTTER_API_VERSION@_la_SOURCES = $(source_c) $(source_h)
 nodist_libmutter_cogl_path_@LIBMUTTER_API_VERSION@_la_SOURCES = $(BUILT_SOURCES)
 libmutter_cogl_path_@LIBMUTTER_API_VERSION@_la_CFLAGS = $(COGL_DEP_CFLAGS) $(COGL_EXTRA_CFLAGS) $(MAINTAINER_CFLAGS)
-libmutter_cogl_path_@LIBMUTTER_API_VERSION@_la_LIBADD = $(top_builddir)/cogl/libmutter-cogl-$(LIBMUTTER_API_VERSION).la
+libmutter_cogl_path_@LIBMUTTER_API_VERSION@_la_LIBADD = $(top_builddir)/cogl/libpage-mutter-cogl-$(LIBMUTTER_API_VERSION).la
 libmutter_cogl_path_@LIBMUTTER_API_VERSION@_la_LIBADD += $(COGL_DEP_LIBS) $(COGL_EXTRA_LDFLAGS)
 libmutter_cogl_path_@LIBMUTTER_API_VERSION@_la_LDFLAGS = \
 	-export-dynamic \
