@@ -8,6 +8,6 @@ requires=@COGL_PKG_REQUIRES@ page-mutter-cogl-@LIBMUTTER_API_VERSION@
 Name: Cogl
 Description: A 2D path drawing library for Cogl
 Version: @MUTTER_VERSION@
-Libs: -L${libdir} -lmutter-cogl-path-@LIBMUTTER_API_VERSION@
+Libs: -L${libdir} -lpage-mutter-cogl-path-@LIBMUTTER_API_VERSION@
 Cflags: -I${includedir}/cogl
 Requires: ${requires}

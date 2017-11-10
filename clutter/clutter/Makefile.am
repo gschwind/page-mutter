@@ -590,7 +590,7 @@ libmutter_clutter_@LIBMUTTER_API_VERSION@_la_LIBADD = \
 	$(CLUTTER_LIBS) \
 	$(top_builddir)/../cogl/cogl/libpage-mutter-cogl-$(LIBMUTTER_API_VERSION).la \
 	$(top_builddir)/../cogl/cogl-pango/libpage-mutter-cogl-pango-$(LIBMUTTER_API_VERSION).la \
-	$(top_builddir)/../cogl/cogl-path/libmutter-cogl-path-$(LIBMUTTER_API_VERSION).la \
+	$(top_builddir)/../cogl/cogl-path/libpage-mutter-cogl-path-$(LIBMUTTER_API_VERSION).la \
 	$(NULL)
 
 libmutter_clutter_@LIBMUTTER_API_VERSION@_la_SOURCES = \

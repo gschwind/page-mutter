@@ -134,7 +134,7 @@ test_conformance_LDADD = \
 	$(top_builddir)/cogl/libpage-mutter-cogl-$(LIBMUTTER_API_VERSION).la \
 	$(LIBM)
 if BUILD_COGL_PATH
-test_conformance_LDADD += $(top_builddir)/cogl-path/libmutter-cogl-path-$(LIBMUTTER_API_VERSION).la
+test_conformance_LDADD += $(top_builddir)/cogl-path/libpage-mutter-cogl-path-$(LIBMUTTER_API_VERSION).la
 endif
 test_conformance_LDFLAGS = -export-dynamic
 
