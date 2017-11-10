@@ -23,13 +23,13 @@ source_h_priv = \
 	$(NULL)
 
 mutterlibdir = $(libdir)/page-mutter
-mutterlib_LTLIBRARIES = libmutter-cogl-pango-@LIBMUTTER_API_VERSION@.la
+mutterlib_LTLIBRARIES = libpage-mutter-cogl-pango-@LIBMUTTER_API_VERSION@.la
 
-libmutter_cogl_pango_@LIBMUTTER_API_VERSION@_la_SOURCES = $(source_c) $(source_h) $(source_h_priv)
-libmutter_cogl_pango_@LIBMUTTER_API_VERSION@_la_CFLAGS = $(COGL_DEP_CFLAGS) $(COGL_PANGO_DEP_CFLAGS) $(COGL_EXTRA_CFLAGS) $(MAINTAINER_CFLAGS)
-libmutter_cogl_pango_@LIBMUTTER_API_VERSION@_la_LIBADD = $(top_builddir)/cogl/libpage-mutter-cogl-$(LIBMUTTER_API_VERSION).la
-libmutter_cogl_pango_@LIBMUTTER_API_VERSION@_la_LIBADD += $(COGL_DEP_LIBS) $(COGL_PANGO_DEP_LIBS) $(COGL_EXTRA_LDFLAGS)
-libmutter_cogl_pango_@LIBMUTTER_API_VERSION@_la_LDFLAGS = \
+libpage_mutter_cogl_pango_@LIBMUTTER_API_VERSION@_la_SOURCES = $(source_c) $(source_h) $(source_h_priv)
+libpage_mutter_cogl_pango_@LIBMUTTER_API_VERSION@_la_CFLAGS = $(COGL_DEP_CFLAGS) $(COGL_PANGO_DEP_CFLAGS) $(COGL_EXTRA_CFLAGS) $(MAINTAINER_CFLAGS)
+libpage_mutter_cogl_pango_@LIBMUTTER_API_VERSION@_la_LIBADD = $(top_builddir)/cogl/libpage-mutter-cogl-$(LIBMUTTER_API_VERSION).la
+libpage_mutter_cogl_pango_@LIBMUTTER_API_VERSION@_la_LIBADD += $(COGL_DEP_LIBS) $(COGL_PANGO_DEP_LIBS) $(COGL_EXTRA_LDFLAGS)
+libpage_mutter_cogl_pango_@LIBMUTTER_API_VERSION@_la_LDFLAGS = \
 	-export-dynamic \
 	-rpath $(mutterlibdir) \
 	-export-symbols-regex "^cogl_pango_.*" \
@@ -65,15 +65,15 @@ INTROSPECTION_GIRS =
 if HAVE_INTROSPECTION
 INTROSPECTION_COMPILER_ARGS=--includedir=$(top_builddir)/cogl
 
-CoglPango-@LIBMUTTER_API_VERSION@.gir: libmutter-cogl-pango-$(LIBMUTTER_API_VERSION).la Makefile
+CoglPango-@LIBMUTTER_API_VERSION@.gir: libpage-mutter-cogl-pango-$(LIBMUTTER_API_VERSION).la Makefile
 
 CoglPango_@LIBMUTTER_API_VERSION@_gir_NAMESPACE = CoglPango
 CoglPango_@LIBMUTTER_API_VERSION@_gir_VERSION = @LIBMUTTER_API_VERSION@
-CoglPango_@LIBMUTTER_API_VERSION@_gir_LIBS = $(top_builddir)/cogl/libpage-mutter-cogl-$(LIBMUTTER_API_VERSION).la libmutter-cogl-pango-$(LIBMUTTER_API_VERSION).la
+CoglPango_@LIBMUTTER_API_VERSION@_gir_LIBS = $(top_builddir)/cogl/libpage-mutter-cogl-$(LIBMUTTER_API_VERSION).la libpage-mutter-cogl-pango-$(LIBMUTTER_API_VERSION).la
 CoglPango_@LIBMUTTER_API_VERSION@_gir_FILES = $(source_h) $(source_c)
 CoglPango_@LIBMUTTER_API_VERSION@_gir_CFLAGS = $(AM_CPPFLAGS) $(COGL_DEP_CFLAGS) $(COGL_PANGO_DEP_CFLAGS)
 CoglPango_@LIBMUTTER_API_VERSION@_gir_INCLUDES = Pango-1.0 PangoCairo-1.0
-CoglPango_@LIBMUTTER_API_VERSION@_gir_EXPORT_PACKAGES = mutter-cogl-pango-@LIBMUTTER_API_VERSION@
+CoglPango_@LIBMUTTER_API_VERSION@_gir_EXPORT_PACKAGES = page-mutter-cogl-pango-@LIBMUTTER_API_VERSION@
 CoglPango_@LIBMUTTER_API_VERSION@_gir_SCANNERFLAGS = \
 	--warn-all \
 	--identifier-prefix=CoglPango \
