@@ -583,9 +583,9 @@ nodist_clutter_include_HEADERS = clutter-config.h $(built_source_h)
 clutter_deprecated_HEADERS = $(deprecated_h)
 
 mutterlibdir = $(libdir)/page-mutter
-mutterlib_LTLIBRARIES = libmutter-clutter-@LIBMUTTER_API_VERSION@.la
+mutterlib_LTLIBRARIES = libpage-mutter-clutter-@LIBMUTTER_API_VERSION@.la
 
-libmutter_clutter_@LIBMUTTER_API_VERSION@_la_LIBADD = \
+libpage_mutter_clutter_@LIBMUTTER_API_VERSION@_la_LIBADD = \
 	$(LIBM) \
 	$(CLUTTER_LIBS) \
 	$(top_builddir)/../cogl/cogl/libpage-mutter-cogl-$(LIBMUTTER_API_VERSION).la \
@@ -593,7 +593,7 @@ libmutter_clutter_@LIBMUTTER_API_VERSION@_la_LIBADD = \
 	$(top_builddir)/../cogl/cogl-path/libpage-mutter-cogl-path-$(LIBMUTTER_API_VERSION).la \
 	$(NULL)
 
-libmutter_clutter_@LIBMUTTER_API_VERSION@_la_SOURCES = \
+libpage_mutter_clutter_@LIBMUTTER_API_VERSION@_la_SOURCES = \
 	$(backend_source_c) \
 	$(backend_source_h) \
 	$(backend_source_c_priv) \
@@ -611,12 +611,12 @@ libmutter_clutter_@LIBMUTTER_API_VERSION@_la_SOURCES = \
 	$(cally_sources_private) \
 	$(NULL)
 
-nodist_libmutter_clutter_@LIBMUTTER_API_VERSION@_la_SOURCES = \
+nodist_libpage_mutter_clutter_@LIBMUTTER_API_VERSION@_la_SOURCES = \
 	$(backend_source_built) \
 	$(built_source_c) \
 	$(built_source_h)
 
-libmutter_clutter_@LIBMUTTER_API_VERSION@_la_LDFLAGS = \
+libpage_mutter_clutter_@LIBMUTTER_API_VERSION@_la_LDFLAGS = \
 	$(CLUTTER_LINK_FLAGS) \
 	$(CLUTTER_LT_LDFLAGS) \
 	-export-dynamic \
@@ -630,13 +630,13 @@ install-exec-local:
 	    rm -f $$lib.0.$(CLUTTER_LT_CURRENT).$(CLUTTER_LT_REVISION); \
 	  ) ; \
 	  (cd $(DESTDIR)$(mutterlibdir) && \
-	    { ln -s -f libmutter-clutter-$(LIBMUTTER_API_VERSION).so.0.$(CLUTTER_LT_CURRENT).$(CLUTTER_LT_REVISION) $$lib.0 || \
-	      { rm -f $$lib.0 && ln -s libmutter-clutter-$(LIBMUTTER_API_VERSION).so.0.$(CLUTTER_LT_CURRENT).$(CLUTTER_LT_REVISION) $$lib.0; }; \
+	    { ln -s -f libpage-mutter-clutter-$(LIBMUTTER_API_VERSION).so.0.$(CLUTTER_LT_CURRENT).$(CLUTTER_LT_REVISION) $$lib.0 || \
+	      { rm -f $$lib.0 && ln -s libpage-mutter-clutter-$(LIBMUTTER_API_VERSION).so.0.$(CLUTTER_LT_CURRENT).$(CLUTTER_LT_REVISION) $$lib.0; }; \
 	    } \
 	  ) ; \
 	  (cd $(DESTDIR)$(mutterlibdir) && \
-	    { ln -s -f libmutter-clutter-$(LIBMUTTER_API_VERSION).so.0.$(CLUTTER_LT_CURRENT).$(CLUTTER_LT_REVISION) $$lib || \
-	      { rm -f $$lib && ln -s libmutter-clutter-$(LIBMUTTER_API_VERSION).so.0.$(CLUTTER_LT_CURRENT).$(CLUTTER_LT_REVISION) $$lib; }; \
+	    { ln -s -f libpage-mutter-clutter-$(LIBMUTTER_API_VERSION).so.0.$(CLUTTER_LT_CURRENT).$(CLUTTER_LT_REVISION) $$lib || \
+	      { rm -f $$lib && ln -s libpage-mutter-clutter-$(LIBMUTTER_API_VERSION).so.0.$(CLUTTER_LT_CURRENT).$(CLUTTER_LT_REVISION) $$lib; }; \
 	    } \
 	  ) ; \
 	done
@@ -653,11 +653,11 @@ INTROSPECTION_COMPILER_ARGS = \
 INTROSPECTION_SCANNER_ENV = \
 	PKG_CONFIG_PATH=$(top_builddir)/../cogl/cogl/:$(top_builddir)/../cogl/cogl-pango/:$${PKG_CONFIG_PATH}
 
-Clutter-@LIBMUTTER_API_VERSION@.gir: libmutter-clutter-@LIBMUTTER_API_VERSION@.la Makefile
+Clutter-@LIBMUTTER_API_VERSION@.gir: libpage-mutter-clutter-@LIBMUTTER_API_VERSION@.la Makefile
 
 Clutter_@LIBMUTTER_API_VERSION@_gir_NAMESPACE = Clutter
 Clutter_@LIBMUTTER_API_VERSION@_gir_VERSION = @LIBMUTTER_API_VERSION@
-Clutter_@LIBMUTTER_API_VERSION@_gir_LIBS = libmutter-clutter-@LIBMUTTER_API_VERSION@.la
+Clutter_@LIBMUTTER_API_VERSION@_gir_LIBS = libpage-mutter-clutter-@LIBMUTTER_API_VERSION@.la
 Clutter_@LIBMUTTER_API_VERSION@_gir_FILES = \
 	$(clutter_include_HEADERS) \
 	$(clutter_deprecated_HEADERS) \
@@ -670,7 +670,7 @@ Clutter_@LIBMUTTER_API_VERSION@_gir_INCLUDES = GL-1.0 GObject-2.0 cairo-1.0 Cogl
 Clutter_@LIBMUTTER_API_VERSION@_gir_SCANNERFLAGS = \
 	--warn-all \
 	--c-include='clutter/clutter.h' \
-	--pkg-export=mutter-clutter-@LIBMUTTER_API_VERSION@
+	--pkg-export=page-mutter-clutter-@LIBMUTTER_API_VERSION@
 
 INTROSPECTION_GIRS += Clutter-@LIBMUTTER_API_VERSION@.gir
 
@@ -678,7 +678,7 @@ Cally-@LIBMUTTER_API_VERSION@.gir: Makefile Clutter-@LIBMUTTER_API_VERSION@.gir
 
 Cally_@LIBMUTTER_API_VERSION@_gir_NAMESPACE = Cally
 Cally_@LIBMUTTER_API_VERSION@_gir_VERSION = @LIBMUTTER_API_VERSION@
-Cally_@LIBMUTTER_API_VERSION@_gir_LIBS = libmutter-clutter-@LIBMUTTER_API_VERSION@.la
+Cally_@LIBMUTTER_API_VERSION@_gir_LIBS = libpage-mutter-clutter-@LIBMUTTER_API_VERSION@.la
 Cally_@LIBMUTTER_API_VERSION@_gir_FILES = $(cally_sources_h) $(cally_sources_c)
 Cally_@LIBMUTTER_API_VERSION@_gir_CFLAGS = $(AM_CPPFLAGS) $(CLUTTER_CFLAGS)
 Cally_@LIBMUTTER_API_VERSION@_gir_SCANNERFLAGS = \
@@ -693,13 +693,13 @@ ClutterX11-@LIBMUTTER_API_VERSION@.gir: Makefile Clutter-@LIBMUTTER_API_VERSION@
 
 ClutterX11_@LIBMUTTER_API_VERSION@_gir_NAMESPACE = ClutterX11
 ClutterX11_@LIBMUTTER_API_VERSION@_gir_INCLUDES = xlib-2.0
-ClutterX11_@LIBMUTTER_API_VERSION@_gir_LIBS = libmutter-clutter-@LIBMUTTER_API_VERSION@.la
+ClutterX11_@LIBMUTTER_API_VERSION@_gir_LIBS = libpage-mutter-clutter-@LIBMUTTER_API_VERSION@.la
 ClutterX11_@LIBMUTTER_API_VERSION@_gir_FILES = $(x11_introspection)
 ClutterX11_@LIBMUTTER_API_VERSION@_gir_CFLAGS = $(AM_CPPFLAGS) $(CLUTTER_CFLAGS)
 ClutterX11_@LIBMUTTER_API_VERSION@_gir_SCANNERFLAGS = \
 	--warn-all \
 	--c-include='clutter/x11/clutter-x11.h' \
-	--pkg-export=mutter-clutter-x11-@LIBMUTTER_API_VERSION@ \
+	--pkg-export=page-mutter-clutter-x11-@LIBMUTTER_API_VERSION@ \
 	--include-uninstalled=$(top_builddir)/clutter/Clutter-@LIBMUTTER_API_VERSION@.gir
 
 INTROSPECTION_GIRS += ClutterX11-@LIBMUTTER_API_VERSION@.gir

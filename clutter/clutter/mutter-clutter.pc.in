@@ -18,7 +18,7 @@ cogl_driver=deprecated
 Name: Mutter Clutter
 Description: Mutter's Clutter Private Library
 Version: @MUTTER_VERSION@
-Libs: -L${libdir} -lmutter-clutter-${apiversion}
+Libs: -L${libdir} -lpage-mutter-clutter-${apiversion}
 Cflags: -I${includedir}/clutter-${apiversion}
 Requires: ${requires}
 Requires.private: ${requires_private}

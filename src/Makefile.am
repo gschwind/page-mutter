@@ -410,7 +410,7 @@ libpage_mutter_@LIBMUTTER_API_VERSION@_la_LDFLAGS = \
 libpage_mutter_@LIBMUTTER_API_VERSION@_la_LIBADD  = \
 	$(MUTTER_LIBS) \
 	$(MUTTER_NATIVE_BACKEND_LIBS)	\
-	$(top_builddir)/clutter/clutter/libmutter-clutter-$(LIBMUTTER_API_VERSION).la \
+	$(top_builddir)/clutter/clutter/libpage-mutter-clutter-$(LIBMUTTER_API_VERSION).la \
 	$(NULL)
 
 # Headers installed for plugins; introspected information will
